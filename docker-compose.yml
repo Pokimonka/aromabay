@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # Коробка с базой данных
+  postgres:
+    image: postgres:15  # Готовая коробка с PostgreSQL
+    environment:        # Настройки для базы
+      POSTGRES_DB: aromabay
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Сохраняем данные
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d aromabay"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Коробка с RabbitMQ (очереди сообщений)
+  rabbitmq:
+    image: rabbitmq:3-management  # Готовая коробка
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - "5672:5672"
+      - "15672:15672"  # ← ДОБАВЛЕНО Web UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      
+  # Наша коробка с backend (собираем по Dockerfile)
+  backend:
+    build: ./backend    # Собрать коробку из папки backend
+    ports:
+      - "8000:8000"    # Открыть порт 8000 наружу
+    environment:       # Настройки для backend
+      DATABASE_URL: postgresql://user:password@postgres:5432/aromabay
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672/
+    depends_on:        # Сначала запустить эти коробки
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure  # ← Перезапуск при ошибке подключения
+
+  # Наша коробка с ботом
+  bot:
+    build: ./tg_bot       # Собрать коробку из папки bot
+    environment:
+      DATABASE_URL: postgresql://user:password@postgres:5432/aromabay
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672/
+      TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTICcdSjhe8weU"  # Токен бота
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure  # ← Перезапуск при ошибке подключения
+
+# Место для хранения данных (чтобы не терялись при перезапуске)
+volumes:
+  postgres_data:
+  rabbitmq_data:
