@@ -5,7 +5,6 @@ from typing import Callable, Awaitable
 import aio_pika
 import pika
 from aio_pika import Message, connect_robust
-from dotenv import load_dotenv
 from faststream import FastStream
 from faststream.rabbit import RabbitBroker
 
@@ -14,7 +13,6 @@ from faststream.rabbit import RabbitBroker
 #     "RABBITMQ_URL",
 #     "amqp://guest:guest@rabbitmq:5672/"
 # )
-load_dotenv()
 # FastStream брокер для асинхронных операций
 broker = RabbitBroker()
 app = FastStream(broker)

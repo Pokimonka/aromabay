@@ -41,6 +41,8 @@ services:
     environment:       # Настройки для backend
       DATABASE_URL: postgresql://user:password@postgres:5432/aromabay
       RABBITMQ_URL: amqp://user:password@rabbitmq:5672/
+    env_file:
+      - .env
     depends_on:        # Сначала запустить эти коробки
       postgres:
         condition: service_healthy
@@ -55,6 +57,8 @@ services:
       DATABASE_URL: postgresql://user:password@postgres:5432/aromabay
       RABBITMQ_URL: amqp://user:password@rabbitmq:5672/
       TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTICcdSjhe8weU"  # Токен бота
+    env_file:
+      - .env
     depends_on:
       postgres:
         condition: service_healthy

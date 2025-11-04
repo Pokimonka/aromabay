@@ -5,9 +5,7 @@ from aiogram.types import Message, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 import asyncpg
 from .shared_bot import send_to_admins
-from dotenv import load_dotenv
 
-load_dotenv()
 TOKEN = os.getenv(str("TELEGRAM_BOT_TOKEN"))
 # Инициализация бота и диспетчера
 
@@ -15,16 +13,18 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 # Список ID админов (замени на реальные)
-ADMIN_IDS = [6473177486]
+ADMIN_IDS = [6473177486, 6790135401]
 
 def is_admin(user_id: int) -> bool:
     """Проверяет, является ли пользователь админом"""
+    print(user_id)
+    print(user_id in ADMIN_IDS)
     return user_id in ADMIN_IDS
 
 
 async def get_db_connection():
     """Получение подключения к БД"""
-    database_url = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/aromabay")
+    database_url = os.getenv("DATABASE_URL")
     connect = None
     try:
         connect = await asyncpg.connect(database_url)
@@ -65,6 +65,7 @@ async def cmd_orders(message: Message):
     print("Execute cmd_orders")
 
     if not is_admin(message.from_user.id):
+        print(message.from_user.id)
         await message.answer("❌ У вас нет доступа к этой команде.")
         return
 

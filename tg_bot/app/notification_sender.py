@@ -2,8 +2,6 @@ import aio_pika
 import json
 import os
 
-from dotenv import load_dotenv
-
 from .shared_bot import send_to_admins
 from .message_templates import (
     order_processed_template,
@@ -11,8 +9,6 @@ from .message_templates import (
     low_stock_template,
     new_order_created_template
 )
-load_dotenv()
-
 
 class NotificationSender:
     def __init__(self):

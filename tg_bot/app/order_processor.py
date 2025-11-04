@@ -3,11 +3,6 @@ import json
 import asyncpg
 import os
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
-
 class OrderProcessor:
     def __init__(self):
         self.rabbitmq_url = os.getenv("RABBITMQ_URL")
