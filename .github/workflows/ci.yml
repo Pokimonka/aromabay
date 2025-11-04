@@ -1,0 +1,45 @@
+  test-bot:
+    name: Test Telegram Bot
+    runs-on: ubuntu-latest
+    needs: test-backend
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install bot dependencies
+      run: |
+        cd tg_bot
+        pip install -r requirements.txt
+    
+    - name: Run bot tests
+      run: |
+        cd tg_bot
+        python -m pytest tests/ -v
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+        TELEGRAM_BOT_TOKEN: "test-bot-token-for-ci"
+        ADMIN_IDS: "6473177486"
+    
+    - name: Check bot syntax
+      run: |
+        cd tg_bot
+        python -c "import app.bot, app.shared_bot; print('✅ All bot modules import successfully')"
