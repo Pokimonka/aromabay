@@ -179,11 +179,15 @@ def get_sync_client():
 
 def publish_order(order_data: dict):
     """Синхронная публикация заказа (для BackgroundTasks)"""
-    return get_sync_client.publish("orders", order_data)
+    global sync_client
+    sync_client = get_sync_client()
+    return sync_client.publish("orders", order_data)
 
 def publish_notification(notification_data: dict):
     """Синхронная публикация уведомления (для BackgroundTasks)"""
-    return get_sync_client.publish("notifications", notification_data)
+    global sync_client
+    sync_client = get_sync_client()
+    return sync_client.publish("notifications", notification_data)
 
 
 async def declare_exchange(self, exchange_name: str, exchange_type: str = "direct"):
