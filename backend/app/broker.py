@@ -8,7 +8,8 @@ from aio_pika import Message, connect_robust
 from dotenv import load_dotenv
 from faststream import FastStream
 from faststream.rabbit import RabbitBroker
-load_dotenv(os.path.join('..', '.env'))
+load_dotenv('.env')
+
 # URL для подключения к RabbitMQ
 # rabbit_url = os.getenv(
 #     "RABBITMQ_URL",
