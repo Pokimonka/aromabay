@@ -1,0 +1,194 @@
+# Название нашего workflow (пайплайна)
+name: CI/CD Pipeline
+
+# КОГДА запускается этот workflow?
+on:
+  # При пуше в эти ветки:
+  push:
+    branches: [ develop, staging, main ]
+  # И при создании Pull Request в эти ветки:
+  pull_request:
+    branches: [ develop, staging, main ]
+
+# ЧТО делает наш workflow? Описываем jobs (задачи)
+jobs:
+  # 🔧 ЗАДАЧА 1: Тестирование бэкенда
+  test-backend:
+    # На каком сервере запускаем
+    runs-on: ubuntu-latest
+    
+    # Сервисы которые нужны для тестов (как docker-compose но для CI)
+    services:
+      # Запускаем PostgreSQL для тестов
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      # Запускаем RabbitMQ для тестов
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - 5672:5672
+
+    # ШАГИ которые выполняются последовательно:
+    steps:
+    # Шаг 1: Получаем код из репозитория
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    # Шаг 2: Устанавливаем Python
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    # Шаг 3: Устанавливаем зависимости бэкенда
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        pip install -r requirements.txt
+    
+    # Шаг 4: Запускаем тесты бэкенда
+    - name: Run backend tests
+      run: |
+        cd backend
+        python -m pytest tests/ -v
+      # Переменные окружения для тестов:
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+        SECRET_KEY: jvepox9awxJEsrT_KRQLiigA8estyMp6AqLrTbzAjRU
+        RABBITMQ_URL: amqp://guest:guest@localhost:5672/
+
+  # 🤖 ЗАДАЧА 2: Тестирование Telegram бота
+  test-bot:
+    runs-on: ubuntu-latest
+    # ЭТОТ job ждет пока test-backend завершится
+    needs: test-backend
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install bot dependencies
+      run: |
+        cd tg_bot
+        pip install -r requirements.txt
+    
+    - name: Run bot tests
+      run: |
+        cd tg_bot
+        python -m pytest tests/ -v
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+        TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTIpodSjhe8weU"
+        ADMIN_IDS: "6473177486"
+
+    - name: Check bot syntax
+      run: |
+        cd tg_bot
+        python -c "import app.bot, app.shared_bot; print('✅ All bot modules import successfully')"
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+        TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTIpodSjhe8weU"
+
+  # 🐳 ЗАДАЧА 3: Сборка Docker образов
+  build-docker:
+    runs-on: ubuntu-latest
+    # Ждем пока ВСЕ тесты пройдут
+    needs: [test-backend, test-bot]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    # Собираем образ бэкенда
+    - name: Build backend image
+      run: |
+        cd backend
+        docker build -t aromabay-backend:latest .
+    
+    # Собираем образ бота
+    - name: Build bot image
+      run: |
+        cd tg_bot
+        docker build -t aromabay-bot:latest .
+
+  # 🚀 ЗАДАЧА 4: Деплой на STAGING сервер
+  deploy-staging:
+    # Запускается ТОЛЬКО при пуше в staging ветку
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    needs: build-docker  # Ждем сборки образов
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to staging
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.STAGING_SERVER_IP }}
+        username: ${{ secrets.STAGING_USER }}
+        key: ${{ secrets.STAGING_SSH_KEY }}
+        script: |
+          cd ~/aromabay
+          # Останавливаем старые контейнеры
+          docker compose down || true
+          # Удаляем старые образы чтобы освободить место
+          docker system prune -f
+          # Клонируем/обновляем код
+          git clone https://github.com/ВАШ_НИКНЕЙМ/aromabay.git . || git pull origin staging
+          # Запускаем проект
+          docker compose up -d --build
+          # Проверяем что все запустилось
+          docker ps
+          echo "🚀 Staging deployment completed!"
+          
+  # 🎯 ЗАДАЧА 5: Деплой на PRODUCTION сервер
+  deploy-production:
+    # Запускается ТОЛЬКО при пуше в main ветку
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: build-docker
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to production
+      run: |
+        echo "🎯 Деплой на PRODUCTION сервер"
+        echo "Здесь будет команда для деплоя на боевой сервер"
+        # Позже добавим реальные команды деплоя
+      env:
+        SERVER_URL: ${{ secrets.PRODUCTION_SERVER_URL }}
+        SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}

@@ -4,7 +4,10 @@ from aiogram.filters import Command
 from aiogram.types import Message, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 import asyncpg
+from dotenv import load_dotenv
+
 from .shared_bot import send_to_admins
+load_dotenv('.env')
 
 TOKEN = os.getenv(str("TELEGRAM_BOT_TOKEN"))
 # Инициализация бота и диспетчера

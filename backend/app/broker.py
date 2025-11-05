@@ -5,8 +5,10 @@ from typing import Callable, Awaitable
 import aio_pika
 import pika
 from aio_pika import Message, connect_robust
+from dotenv import load_dotenv
 from faststream import FastStream
 from faststream.rabbit import RabbitBroker
+load_dotenv('.env')
 
 # URL для подключения к RabbitMQ
 # rabbit_url = os.getenv(
@@ -167,15 +169,21 @@ class SyncRabbitMQClient:
             print(f"❌ Failed to send message to {queue}: {e}")
             return False
 
-sync_client = SyncRabbitMQClient()
+sync_client = None
+
+def get_sync_client():
+    global sync_client
+    if sync_client is None:
+        sync_client = SyncRabbitMQClient()
+    return sync_client
 
 def publish_order(order_data: dict):
     """Синхронная публикация заказа (для BackgroundTasks)"""
-    return sync_client.publish("orders", order_data)
+    return get_sync_client.publish("orders", order_data)
 
 def publish_notification(notification_data: dict):
     """Синхронная публикация уведомления (для BackgroundTasks)"""
-    return sync_client.publish("notifications", notification_data)
+    return get_sync_client.publish("notifications", notification_data)
 
 
 async def declare_exchange(self, exchange_name: str, exchange_type: str = "direct"):
