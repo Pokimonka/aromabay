@@ -96,3 +96,5 @@ jobs:
       run: |
         cd tg_bot
         python -c "import app.bot, app.shared_bot; print('✅ All bot modules import successfully')"
+      env:
+        TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTICcpljhe8weU"
