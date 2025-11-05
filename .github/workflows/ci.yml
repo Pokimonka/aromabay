@@ -166,7 +166,7 @@ jobs:
           # Удаляем старые образы чтобы освободить место
           docker system prune -f
           # Клонируем/обновляем код
-          git clone https://github.com/ВАШ_НИКНЕЙМ/aromabay.git . || git pull origin staging
+          git clone https://github.com/Pokimonka/aromabay.git . || git pull origin staging
           # Запускаем проект
           docker compose up -d --build
           # Проверяем что все запустилось
