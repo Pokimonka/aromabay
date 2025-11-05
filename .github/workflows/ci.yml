@@ -113,6 +113,9 @@ jobs:
       run: |
         cd tg_bot
         python -c "import app.bot, app.shared_bot; print('✅ All bot modules import successfully')"
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+        TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTIpodSjhe8weU"
 
   # 🐳 ЗАДАЧА 3: Сборка Docker образов
   build-docker:
