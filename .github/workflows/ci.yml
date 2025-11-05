@@ -49,7 +49,7 @@ jobs:
         python -m pytest tests/ -v
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
-        SECRET_KEY: test-secret-key-for-ci
+        SECRET_KEY: jvepox9awxJEsrT_KRQLiigA8eswrMp6AqLrTjhAjRU
 
   test-bot:
     name: Test Telegram Bot
@@ -89,7 +89,7 @@ jobs:
         python -m pytest tests/ -v
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
-        TELEGRAM_BOT_TOKEN: "test-bot-token-for-ci"
+        TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTICcpljhe8weU"
         ADMIN_IDS: "6473177486"
     
     - name: Check bot syntax
