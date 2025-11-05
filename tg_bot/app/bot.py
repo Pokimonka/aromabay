@@ -41,7 +41,7 @@ async def get_db_connection():
 async def cmd_start(message: Message):
     """Обработчик команды /start"""
     print("Execute cmd_start")
-
+    print(f"message.from_user.id: {message.from_user.id}")
     if is_admin(message.from_user.id):
         keyboard = InlineKeyboardBuilder()
         keyboard.add(InlineKeyboardButton(text="📦 Последние заказы", callback_data="recent_orders"))
@@ -66,9 +66,8 @@ async def cmd_start(message: Message):
 async def cmd_orders(message: Message):
     """Показать последние заказы"""
     print("Execute cmd_orders")
-
+    print(f"message.from_user.id: {message.from_user.id}")
     if not is_admin(message.from_user.id):
-        print(message.from_user.id)
         await message.answer("❌ У вас нет доступа к этой команде.")
         return
 
@@ -118,7 +117,7 @@ async def cmd_orders(message: Message):
 async def cmd_stats(message: Message):
     """Показать статистику магазина"""
     print("Execute cmd_stats")
-
+    print(f"message.from_user.id: {message.from_user.id}")
     if not is_admin(message.from_user.id):
         await message.answer("❌ У вас нет доступа к этой команде.")
         return
@@ -179,7 +178,7 @@ async def show_stats(callback: types.CallbackQuery):
 async def show_products(callback: types.CallbackQuery):
     """Показать список товаров"""
     print("Execute show_products")
-
+    print(f"message.from_user.id: {callback.from_user.id}")
     if not is_admin(callback.from_user.id):
         await callback.answer("❌ Нет доступа")
         return
@@ -217,6 +216,7 @@ async def show_products(callback: types.CallbackQuery):
 async def confirm_order(callback: types.CallbackQuery):
     """Подтверждение заказа админом"""
     print("Execute confirm_order")
+    print(f"message.from_user.id: {callback.from_user.id}")
     if not is_admin(callback.from_user.id):
         await callback.answer("❌ Нет доступа")
         return
@@ -270,6 +270,7 @@ async def confirm_order(callback: types.CallbackQuery):
 async def cmd_help(message: Message):
     """Справка по командам"""
     print("Execute cmd_help")
+    print(f"message.from_user.id: {message.from_user.id}")
     if is_admin(message.from_user.id):
         help_text = (
             "📖 *Доступные команды:*\n\n"

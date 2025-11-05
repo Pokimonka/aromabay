@@ -41,6 +41,7 @@ services:
     environment:       # Настройки для backend
       DATABASE_URL: postgresql://user:password@postgres:5432/aromabay
       RABBITMQ_URL: amqp://user:password@rabbitmq:5672/
+      SECRET_KEY: jvepox9awxJEsrT_KRQLiigA8eswrMp6AqLrTbzAjRU
     env_file:
       - .env
     depends_on:        # Сначала запустить эти коробки
@@ -56,6 +57,7 @@ services:
     environment:
       DATABASE_URL: postgresql://user:password@postgres:5432/aromabay
       RABBITMQ_URL: amqp://user:password@rabbitmq:5672/
+      ADMIN_IDS: 6473177486
       TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTICcdSjhe8weU"  # Токен бота
     env_file:
       - .env
