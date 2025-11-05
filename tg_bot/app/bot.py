@@ -44,7 +44,7 @@ async def cmd_start(message: Message):
     print(f"message.from_user.id: {message.from_user.id}")
     if is_admin(message.from_user.id):
         keyboard = InlineKeyboardBuilder()
-        keyboard.add(InlineKeyboardButton(text="📦 Последние заказы", callback_data="recent_orders"))
+        keyboard.add(InlineKeyboardButton(text="📦 Последние заказы", callback_data="orders"))
         keyboard.add(InlineKeyboardButton(text="📊 Статистика", callback_data="stats"))
         keyboard.add(InlineKeyboardButton(text="🛍️ Товары", callback_data="products"))
 
@@ -62,7 +62,7 @@ async def cmd_start(message: Message):
         )
 
 
-@dp.message(Command("orders"))
+@dp.callback_query(F.data == "orders")
 async def cmd_orders(message: Message):
     """Показать последние заказы"""
     print("Execute cmd_orders")
@@ -113,7 +113,7 @@ async def cmd_orders(message: Message):
         await conn.close()
 
 
-@dp.message(Command("stats"))
+@dp.callback_query(F.data == "stats")
 async def cmd_stats(message: Message):
     """Показать статистику магазина"""
     print("Execute cmd_stats")
@@ -156,22 +156,22 @@ async def cmd_stats(message: Message):
         await conn.close()
 
 
-@dp.callback_query(F.data == "recent_orders")
-async def show_recent_orders(callback: types.CallbackQuery):
-    """Показать последние заказы через callback"""
-    print("Execute show_recent_orders")
+# @dp.callback_query(F.data == "recent_orders")
+# async def show_recent_orders(callback: types.CallbackQuery):
+#     """Показать последние заказы через callback"""
+#     print("Execute show_recent_orders")
+#
+#     await cmd_orders(callback.message)
+#     await callback.answer()
 
-    await cmd_orders(callback.message)
-    await callback.answer()
 
-
-@dp.callback_query(F.data == "stats")
-async def show_stats(callback: types.CallbackQuery):
-    """Показать статистику через callback"""
-    print("Execute show_stats")
-
-    await cmd_stats(callback.message)
-    await callback.answer()
+# @dp.callback_query(F.data == "stats")
+# async def show_stats(callback: types.CallbackQuery):
+#     """Показать статистику через callback"""
+#     print("Execute show_stats")
+#
+#     await cmd_stats(callback.message)
+#     await callback.answer()
 
 
 @dp.callback_query(F.data == "products")
