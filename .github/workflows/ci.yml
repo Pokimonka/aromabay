@@ -168,28 +168,9 @@ jobs:
           # Клонируем/обновляем код
           git clone https://github.com/Pokimonka/aromabay.git . || git pull origin staging
           # Создаем .env файл из секретов
-	cat > .env << EOF
-	# Database
-	DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}
-	DATABASE_PASSWORD=${{ secrets.STAGING_DATABASE_PASSWORD }}
-	
-	# Telegram Bot
-	TELEGRAM_BOT_TOKEN=${{ secrets.STAGING_TELEGRAM_BOT_TOKEN }}
-	ADMIN_IDS=6473177486
-	
-	# RabbitMQ
-	RABBITMQ_URL=amqp://${{ secrets.STAGING_RABBITMQ_USER }}:${{ secrets.STAGING_RABBITMQ_PASSWORD }}@rabbitmq:5672/
-	RABBITMQ_USER=${{ secrets.STAGING_RABBITMQ_USER }}
-	RABBITMQ_PASSWORD=${{ secrets.STAGING_RABBITMQ_PASSWORD }}
-	
-	# FastAPI
-	SECRET_KEY=${{ secrets.STAGING_SECRET_KEY }}
-	EOF
-	
-	# Запускаем
-	docker compose down
-	docker compose up -d --build
-	echo "🚀 Staging deployment completed!"
+	  docker compose up -d --build
+	  doxker ps
+	  echo "🚀 Staging deployment completed!"
           
   # 🎯 ЗАДАЧА 5: Деплой на PRODUCTION сервер
   deploy-production:
