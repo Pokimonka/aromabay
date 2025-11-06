@@ -167,10 +167,11 @@ jobs:
           docker system prune -f
           # Клонируем/обновляем код
           git clone https://github.com/Pokimonka/aromabay.git . || git pull origin staging
-          # Создаем .env файл из секретов
-	  docker compose up -d --build
-	  doxker ps
-	  echo "🚀 Staging deployment completed!"
+          # Запускаем проект
+          docker compose up -d --build
+          # Проверяем что все запустилось
+          docker ps
+          echo "🚀 Staging deployment completed!"
           
   # 🎯 ЗАДАЧА 5: Деплой на PRODUCTION сервер
   deploy-production:
