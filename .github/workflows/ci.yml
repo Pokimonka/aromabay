@@ -64,7 +64,7 @@ jobs:
       # Переменные окружения для тестов:
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
-        SECRET_KEY: jvepox9awxJEsrT_KRQLiigA8estyMp6AqLrTbzAjRU
+        SECRET_KEY: jvepox9awxJEsrT_KRQLiigA8estyMp6AqLrTbzFake
         RABBITMQ_URL: amqp://guest:guest@localhost:5672/
 
   # 🤖 ЗАДАЧА 2: Тестирование Telegram бота
@@ -106,7 +106,7 @@ jobs:
         python -m pytest tests/ -v
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
-        TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTIpodSjhe8weU"
+        TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTIpodSjh8fake"
         ADMIN_IDS: "6473177486"
 
     - name: Check bot syntax
@@ -115,7 +115,7 @@ jobs:
         python -c "import app.bot, app.shared_bot; print('✅ All bot modules import successfully')"
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
-        TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTIpodSjhe8weU"
+        TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTIpodSjh8fake"
 
   # 🐳 ЗАДАЧА 3: Сборка Docker образов
   build-docker:
@@ -167,11 +167,29 @@ jobs:
           docker system prune -f
           # Клонируем/обновляем код
           git clone https://github.com/Pokimonka/aromabay.git . || git pull origin staging
-          # Запускаем проект
-          docker compose up -d --build
-          # Проверяем что все запустилось
-          docker ps
-          echo "🚀 Staging deployment completed!"
+          # Создаем .env файл из секретов
+          cat > .env << EOF
+          # Database
+          DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}
+          DATABASE_PASSWORD=${{ secrets.STAGING_DATABASE_PASSWORD }}
+        
+          # Telegram Bot
+          TELEGRAM_BOT_TOKEN=${{ secrets.STAGING_TELEGRAM_BOT_TOKEN }}
+          ADMIN_IDS=6473177486
+          
+          # RabbitMQ
+          RABBITMQ_URL=amqp://${{ secrets.STAGING_RABBITMQ_USER }}:${{ secrets.STAGING_RABBITMQ_PASSWORD }}@rabbitmq:5672/
+          RABBITMQ_USER=${{ secrets.STAGING_RABBITMQ_USER }}
+          RABBITMQ_PASSWORD=${{ secrets.STAGING_RABBITMQ_PASSWORD }}
+          
+          # FastAPI
+          SECRET_KEY=${{ secrets.STAGING_SECRET_KEY }}
+          EOF
+            # Запускаем проект
+            docker compose up -d --build
+            # Проверяем что все запустилось
+            docker ps
+            echo "🚀 Staging deployment completed!"
           
   # 🎯 ЗАДАЧА 5: Деплой на PRODUCTION сервер
   deploy-production:
