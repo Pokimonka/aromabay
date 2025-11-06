@@ -63,7 +63,7 @@ jobs:
         python -m pytest tests/ -v
       # Переменные окружения для тестов:
       env:
-        TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTIpodSjh8fake"
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
         SECRET_KEY: jvepox9awxJEsrT_KRQLiigA8estyMp6AqLrTbzFake
         RABBITMQ_URL: amqp://guest:guest@localhost:5672/
 
