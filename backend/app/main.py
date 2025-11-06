@@ -35,20 +35,14 @@ app = FastAPI(
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://aromabay.site",
+        "http://localhost:3000"  # для локальной разработки
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-#docker-compose up --build
-
-# Проверяем что RabbitMQ доступен
-#docker-compose exec backend ping rabbitmq
-
-# Смотрим логи RabbitMQ
-#docker-compose logs rabbitmq
-
 
 # Роутеры
 app.include_router(perfumes.router, prefix="/api/v1")
