@@ -105,7 +105,7 @@ jobs:
         cd tg_bot
         python -m pytest tests/ -v
       env:
-        DATABASE_URL: postgresql://fake:fake@localhost:5432/postgres
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
         TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTIpodSjh8fake"
         ADMIN_IDS: "6473177486"
 
@@ -114,7 +114,7 @@ jobs:
         cd tg_bot
         python -c "import app.bot, app.shared_bot; print('✅ All bot modules import successfully')"
       env:
-        DATABASE_URL: postgresql://fake:fake@localhost:5432/postgres
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
         TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTIpodSjh8fake"
 
   # 🐳 ЗАДАЧА 3: Сборка Docker образов
