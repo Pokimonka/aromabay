@@ -7,7 +7,7 @@ services:
     environment:        # Настройки для базы
       POSTGRES_DB: aromabay
       POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD} 
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Сохраняем данные
     healthcheck:
@@ -20,8 +20,8 @@ services:
   rabbitmq:
     image: rabbitmq:3-management  # Готовая коробка
     environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports:
       - "5672:5672"
       - "15672:15672"  # ← ДОБАВЛЕНО Web UI
@@ -38,10 +38,6 @@ services:
     build: ./backend    # Собрать коробку из папки backend
     ports:
       - "8000:8000"    # Открыть порт 8000 наружу
-    environment:       # Настройки для backend
-      DATABASE_URL: postgresql://user:password@postgres:5432/aromabay
-      RABBITMQ_URL: amqp://user:password@rabbitmq:5672/
-      SECRET_KEY: jvepox9awxJEsrT_KRQLiigA8eswrMp6AqLrTbzAjRU
     env_file:
       - .env
     depends_on:        # Сначала запустить эти коробки
@@ -53,12 +49,7 @@ services:
 
   # Наша коробка с ботом
   bot:
-    build: ./tg_bot       # Собрать коробку из папки bot
-    environment:
-      DATABASE_URL: postgresql://user:password@postgres:5432/aromabay
-      RABBITMQ_URL: amqp://user:password@rabbitmq:5672/
-      ADMIN_IDS: 6473177486
-      TELEGRAM_BOT_TOKEN: "8295415758:AAHiUC12K2lqngvaKrh8kpTICcdSjhe8weU"  # Токен бота
+    build: ./tg_bot
     env_file:
       - .env
     depends_on:
