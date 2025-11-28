@@ -4,8 +4,9 @@ from typing import List
 import pika
 
 from app.broker import publish_order
+from .users import get_current_user
 from ..database import get_db
-from .. import crud, schemas
+from .. import crud, schemas, models
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
@@ -25,17 +26,21 @@ def send_order_notification(order_data: dict):
 def create_order(
         order: schemas.OrderCreate,
         background_tasks: BackgroundTasks,
+        current_user: models.User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
     # Создаем заказ
-    db_order = crud.create_order(db=db, order=order)
+    print("create orders")
+    user_id = current_user.id
+    db_order = crud.create_order(db=db, order=order, user_id=user_id)
     print(db_order)
     # Отправляем уведомление в фоне
     order_data = {
         "order_id": db_order.id,
-        "user_email": db_order.user_email,
+        "status": db_order.status,
         "total_amount": db_order.total_amount,
-        "status": db_order.status
+        "telegram_username": current_user.telegram_username,
+        "user_email": current_user.email
     }
     print("отправляем уведомление в фоне")
     background_tasks.add_task(send_order_notification, order_data)

@@ -33,18 +33,18 @@ services:
       timeout: 5s
       retries: 10
       
-  # Наша коробка с backend (собираем по Dockerfile)
-  backend:
-    build: ./backend    # Собрать коробку из папки backend
-    ports:
-      - "8000:8000"    # Открыть порт 8000 наружу
-    env_file:
-      - .env
-    depends_on:        # Сначала запустить эти коробки
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+  # Наша коробка с backend (собираем по Dockerfile)  
+  backend:  
+    build: ./backend    # Собрать коробку из папки backend  
+    ports:  
+      - "8000:8000"    # Открыть порт 8000 наружу  
+    env_file:  
+    - .env  
+    depends_on:        # Сначала запустить эти коробки  
+      postgres:  
+        condition: service_healthy  
+      rabbitmq:  
+        condition: service_healthy  
     restart: on-failure  # ← Перезапуск при ошибке подключения
 
   # Наша коробка с ботом
@@ -58,6 +58,18 @@ services:
       rabbitmq:
         condition: service_healthy
     restart: on-failure  # ← Перезапуск при ошибке подключения
+    
+    
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_URL: http://localhost:8000
+      HOST: 0.0.0.0
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:    
+      - backend
 
 # Место для хранения данных (чтобы не терялись при перезапуске)
 volumes:
