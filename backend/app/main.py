@@ -1,12 +1,12 @@
 from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.broker import check_health, close_broker, connect_broker
 from . import models
 from .database import engine
-from .routers import perfumes, orders
+from .routers import perfumes, orders, cart, users
+
 
 # Lifespan менеджер
 @asynccontextmanager
@@ -35,18 +35,19 @@ app = FastAPI(
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://aromabay.site",
-        "http://localhost:3000"  # для локальной разработки
-    ],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000",],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
 # Роутеры
-app.include_router(perfumes.router, prefix="/api/v1")
-app.include_router(orders.router, prefix="/api/v1")
+prefix = "/api/v1"
+app.include_router(perfumes.router, prefix=prefix)
+app.include_router(orders.router, prefix=prefix)
+app.include_router(cart.router, prefix=prefix)
+app.include_router(users.router, prefix=prefix)
+
 
 @app.get("/")
 def read_root():

@@ -22,3 +22,8 @@ def read_perfume(perfume_id: int, db: Session = Depends(get_db)):
 @router.post("/", response_model=schemas.PerfumeResponse)
 def create_perfume(perfume: schemas.PerfumeCreate, db: Session = Depends(get_db)):
     return crud.create_perfume(db=db, perfume=perfume)
+
+@router.delete("/{perfume_id}", response_model=schemas.PerfumeResponse)
+def create_perfume(perfume_id:int, db: Session = Depends(get_db)):
+
+    return crud.delete_perfume(db=db, perfume_id=perfume_id)
