@@ -13,6 +13,7 @@ load_dotenv(".env")
 URL_FRONTEND1 = os.getenv('CORS_ORIGINS1')
 URL_FRONTEND2 = os.getenv('CORS_ORIGINS2')
 URL_FRONTEND3 = os.getenv('CORS_ORIGINS3')
+URL_FRONTEND4 = os.getenv('CORS_ORIGINS4')
 
 # Lifespan менеджер
 @asynccontextmanager
@@ -41,7 +42,7 @@ app = FastAPI(
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[URL_FRONTEND1, URL_FRONTEND2,URL_FRONTEND3,],
+    allow_origins=[URL_FRONTEND1, URL_FRONTEND2, URL_FRONTEND3, URL_FRONTEND4,],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
