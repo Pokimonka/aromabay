@@ -62,30 +62,19 @@ services:
     
   frontend:
     build: ./frontend
-    ports:
-      - "3000:3000"    # Открыть порт 3000 наружу для отладки
     environment:
       VITE_API_URL: ${VITE_API_URL}
       HOST: 0.0.0.0
       PORT: 3000
     depends_on:    
       - backend
-      
-      
+
+  # Nginx для проксирования http://IP:3000 -> https://aromabay.site
   nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
+    build: ./nginx
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      # Монтируем SSL сертификаты, если они есть (на сервере)
-      # На локальной машине эта директория может не существовать - это нормально
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-    depends_on:
-      - frontend
-      - backend
+      - "3000:3000"
+      
       
      
 # Место для хранения данных (чтобы не терялись при перезапуске)
