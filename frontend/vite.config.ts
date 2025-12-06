@@ -7,6 +7,12 @@ export default defineConfig({
   server: {
     port: 3000,
     strictPort: true,
+    allowedHosts: [
+      'aromabay.site',
+      'localhost',
+      '127.0.0.1',
+      '213.171.12.94'
+    ],
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
