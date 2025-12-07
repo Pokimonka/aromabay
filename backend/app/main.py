@@ -1,12 +1,19 @@
+import os
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.broker import check_health, close_broker, connect_broker
 from . import models
 from .database import engine
-from .routers import perfumes, orders
+from .routers import perfumes, orders, cart, users
+load_dotenv(".env")
+URL_FRONTEND1 = os.getenv('CORS_ORIGINS1')
+URL_FRONTEND2 = os.getenv('CORS_ORIGINS2')
+URL_FRONTEND3 = os.getenv('CORS_ORIGINS3')
+URL_FRONTEND4 = os.getenv('CORS_ORIGINS4')
 
 # Lifespan менеджер
 @asynccontextmanager
@@ -35,24 +42,19 @@ app = FastAPI(
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[URL_FRONTEND1, URL_FRONTEND2, URL_FRONTEND3, URL_FRONTEND4,],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
-#docker-compose up --build
-
-# Проверяем что RabbitMQ доступен
-#docker-compose exec backend ping rabbitmq
-
-# Смотрим логи RabbitMQ
-#docker-compose logs rabbitmq
-
-
 # Роутеры
-app.include_router(perfumes.router, prefix="/api/v1")
-app.include_router(orders.router, prefix="/api/v1")
+prefix = "/api/v1"
+app.include_router(perfumes.router, prefix=prefix)
+app.include_router(orders.router, prefix=prefix)
+app.include_router(cart.router, prefix=prefix)
+app.include_router(users.router, prefix=prefix)
+
 
 @app.get("/")
 def read_root():
