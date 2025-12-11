@@ -151,10 +151,42 @@ cp .env.example .env
 # Отредактируйте .env файл
 ```
 
-### 2. Запуск через Docker Compose
+### 2. Запуск 
+#### Через Docker Compose
 ```
 docker-compose up --build
 ```
+#### Через терминал отдельный сервис:
+
+Backend:
+```
+cd backend
+cp .env.example .env
+# Отредактируйте .env
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+Frontend:
+```
+cd frontend
+cp .env.example .env
+# Отредактируйте .env
+npm install
+npm run dev
+```
+
+TG_bot:
+```
+cd tg_bot
+cp .env.example .env
+# Отредактируйте .env
+pip install -r requirements.txt
+python -u -m app.main
+```
+
+frontend запустится на http://localhost:3000
+backend запустится на http://localhost:8000
 
 #### Доступные сервисы:
 
