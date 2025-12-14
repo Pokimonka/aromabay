@@ -74,10 +74,9 @@ export interface Cart {
 }
 
 export interface OrderItem {
-  id: number;
   perfume_id: number;
   quantity: number;
-  price: number;
+  price: number
 }
 
 export interface Order {

@@ -40,8 +40,9 @@ class OrderProcessor:
 
         conn = await asyncpg.connect(self.database_url)
         try:
-            order_id = order_data.get("order_id")
-
+            order_id = order_data.get("id")
+            print(order_id)
+            print(type(order_id))
             # Получаем заказ из БД
             order = await conn.fetchrow(
                 "SELECT * FROM orders WHERE id = $1", order_id

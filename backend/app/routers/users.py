@@ -40,8 +40,9 @@ def create_user(
         raise HTTPException(status_code=400, detail="Username already exists")
 
     db_user = crud.create_user(db, user)
-
+    print(f"dp_user {db_user}")
     token = create_session(db, db_user.id)
+    print(f"token {token}")
 
     user = schemas.AuthResponse(
         id=db_user.id,
@@ -51,6 +52,7 @@ def create_user(
         session_token=token,
         message="success"
     )
+    print(f"user {user}")
     response.set_cookie(
         key="session_token",
         value=token,

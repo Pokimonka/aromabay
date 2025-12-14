@@ -29,9 +29,6 @@ def delete_perfume(db: Session, perfume_id: int):
         return perfume
     return None
 
-
-
-
 # Order CRUD
 def create_order(db: Session, order: schemas.OrderCreate, user_id: int) -> models.Order:
     # Создаем заказ
