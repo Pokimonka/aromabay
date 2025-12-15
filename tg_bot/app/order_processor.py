@@ -86,9 +86,9 @@ class OrderProcessor:
                 await self.send_notification({
                     "type": "order_processed",
                     "order_id": order_id,
-                    "status": "confirmed",
-                    "user_email": order['user_email'],
-                    "user_name": order['user_name'],
+                    "status": order['status'],
+                    "user_email": order_data['user_email'],
+                    "telegram_username": order_data['telegram_username'],
                     "total_amount": order['total_amount']
                 })
 
@@ -105,7 +105,7 @@ class OrderProcessor:
                     "order_id": order_id,
                     "status": "cancelled",
                     "user_email": order['user_email'],
-                    "user_name": order['user_name'],
+                    "telegram_username": order['telegram_username'],
                     "total_amount": order['total_amount']
                 })
 
