@@ -32,9 +32,11 @@ export const Cart: React.FC = () => {
     }
     try {
       setIsOrdering(true);
+      console.log(items)
       const orderItems = items.map(item => ({
         perfume_id: item.perfume.id,
         quantity: item.quantity,
+        price: item.perfume.price
       }));
 
       await orderService.createOrder(orderItems);

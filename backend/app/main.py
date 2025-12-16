@@ -13,6 +13,7 @@ from . import models
 from .database import engine
 from .routers import perfumes, orders, cart, users, uploads
 load_dotenv(".env")
+URL_FRONTEND_LOCAL = os.getenv('CORS_FRONTEND_LOCAL')
 URL_FRONTEND2 = os.getenv('CORS_ORIGINS2')
 URL_FRONTEND3 = os.getenv('CORS_ORIGINS3')
 URL_FRONTEND4 = os.getenv('CORS_ORIGINS4')
@@ -49,7 +50,7 @@ app.mount("/upload", StaticFiles(directory=str(STATIC_UPLOADS_DIR)), name="uploa
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[URL_FRONTEND2, URL_FRONTEND3, URL_FRONTEND4,],
+    allow_origins=[URL_FRONTEND_LOCAL, URL_FRONTEND2, URL_FRONTEND3, URL_FRONTEND4,],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]

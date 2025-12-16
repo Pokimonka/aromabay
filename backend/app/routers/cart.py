@@ -51,10 +51,20 @@ def delete_item(
         perfume_id: int,
         current_user: models.User = Depends(get_current_user),
         db: Session = Depends(get_db)):
-    print("get_cart")
-    cart = crud.remove_from_cart(db,
+    cart = crud.remove_item_from_cart(db,
                                 user_id=current_user.id,
                                 perfume_id=perfume_id)
+    if not cart:
+        raise HTTPException(status_code=404, detail="Cart not found")
+
+    return cart
+
+@router.delete("/", response_model=schemas.CartResponse)
+def delete_all_after_order(
+        current_user: models.User = Depends(get_current_user),
+        db: Session = Depends(get_db)):
+    cart = crud.remove_from_cart(db,
+                                user_id=current_user.id)
     if not cart:
         raise HTTPException(status_code=404, detail="Cart not found")
 
