@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, validator, field_validator
 from typing import List, Optional
 from datetime import datetime
 
@@ -6,6 +6,7 @@ from app.models import PerfumeType
 
 
 class PerfumeBase(BaseModel):
+    id: int
     name: str
     brand: str
     price: float
@@ -52,16 +53,14 @@ class CartItemUpdate(BaseModel):
 
 # Order Schemas
 class OrderItemCreate(BaseModel):
-    id: int
     perfume_id: int
     quantity: int
-    price: float
-
+    price: int
 
 class OrderCreate(BaseModel):
-    id: int
-    status: str
+    status:  Optional[str] = "Created"
     items: List[OrderItemCreate]
+
 
 class OrderItemResponse(BaseModel):
     id: int
@@ -75,16 +74,11 @@ class OrderItemResponse(BaseModel):
 
 class OrderResponse(BaseModel):
     id: int
-    user_email: str
-    user_name: str
-    user_phone: str
-    total_amount: float
     status: str
-    created_at: datetime
+    total_amount: float
+    telegram_username: str
+    user_email: str
     items: List[OrderItemResponse]
-
-    class Config:
-        from_attributes = True
 
 # Для создания пользователя (без id, без пароля)
 class UserRegister(BaseModel):

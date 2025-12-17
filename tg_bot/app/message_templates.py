@@ -1,13 +1,13 @@
 def order_processed_template(order_id: int, status: str, user_name: str, user_email: str, total_amount: float) -> str:
     """Шаблон для обработанного заказа"""
-    if status == "confirmed":
+    if status.lower() == "created":
         return (
             f"🎉 *НОВЫЙ ЗАКАЗ!* 🎉\n\n"
             f"📦 *Заказ №{order_id}*\n"
             f"├ 👤 *Клиент:* {user_name}\n"
             f"├ 📧 *Email:* {user_email}\n"
             f"├ 💰 *Сумма:* {total_amount} руб\n"
-            f"└ 🟢 *Статус:* Подтвержден\n\n"
+            f"└ 🟢 *Статус:* Создан\n\n"
             f"_Заказ готов к сборке и отправке_"
         )
     else:

@@ -184,6 +184,12 @@ jobs:
           
           # FastAPI
           SECRET_KEY=${{ secrets.STAGING_SECRET_KEY }}
+          
+          VITE_API_URL=https://aromabay.site/
+          
+          CORS_ORIGINS2=http://localhost:3000
+          CORS_ORIGINS3=https://aromabay.site/
+          CORS_ORIGINS4=http://213.171.12.94:3000
           EOF
             # Запускаем проект
             docker compose up -d --build

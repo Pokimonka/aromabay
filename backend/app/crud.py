@@ -29,9 +29,6 @@ def delete_perfume(db: Session, perfume_id: int):
         return perfume
     return None
 
-
-
-
 # Order CRUD
 def create_order(db: Session, order: schemas.OrderCreate, user_id: int) -> models.Order:
     # Создаем заказ
@@ -119,13 +116,24 @@ def update_perfume_quantity(
 
     return get_cart_items(db, user_id)
 
-def remove_from_cart(db: Session, user_id: int, perfume_id: int):
+def remove_item_from_cart(db: Session, user_id: int, perfume_id: int):
     cart = get_cart(db, user_id)
 
     cart_item = get_cart_item(db, cart.id, perfume_id)
 
     if cart_item:
         db.delete(cart_item)
+        db.commit()
+
+    return get_cart_items(db, user_id)
+
+def remove_from_cart(db: Session, user_id: int):
+    cart = get_cart(db, user_id)
+
+    # cart_item = get_cart_item(db, cart.id)
+
+    if cart:
+        db.delete(cart)
         db.commit()
 
     return get_cart_items(db, user_id)

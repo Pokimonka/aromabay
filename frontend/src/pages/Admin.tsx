@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { usePerfumes } from '../hooks/usePerfumes';
 import { perfumeService } from '../services/perfumes';
+import { uploadService } from '../services/uploads';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
@@ -10,6 +11,10 @@ export const Admin: React.FC = () => {
   const { perfumes, loading, refetch } = usePerfumes();
   const [isAdding, setIsAdding] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [imageName, setImageName] = useState('');
+  const [isDragActive, setIsDragActive] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -49,6 +54,7 @@ export const Admin: React.FC = () => {
         volume: '',
         concentration: '',
       });
+      setImageName('');
       setShowForm(false);
       refetch();
       alert('Товар успешно добавлен!');
@@ -58,6 +64,51 @@ export const Admin: React.FC = () => {
     } finally {
       setIsAdding(false);
     }
+  };
+
+  const handleImageFile = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      alert('Пожалуйста, выберите файл изображения');
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      setImageName(file.name);
+      const { url } = await uploadService.uploadImage(file);
+      setFormData(prev => ({ ...prev, img_url: url }));
+    } catch (error) {
+      console.error('Failed to upload image:', error);
+      alert('Не удалось загрузить изображение');
+      setImageName('');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await handleImageFile(file);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragActive(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      await handleImageFile(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragActive(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragActive(false);
   };
 
   const handleDeleteProduct = async (id: number) => {
@@ -155,11 +206,55 @@ export const Admin: React.FC = () => {
               </div>
               
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Изображение
+                </label>
+                <div
+                  className={`border-2 border-dashed rounded-lg p-4 cursor-pointer transition-colors ${
+                    isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400'
+                  }`}
+                  onClick={() => fileInputRef.current?.click()}
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileInputChange}
+                  />
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-700 font-medium">Перетащите фото сюда</p>
+                      <p className="text-xs text-gray-500">или нажмите, чтобы выбрать файл</p>
+                      {imageName && (
+                        <p className="text-xs text-green-700 mt-2">
+                          Выбрано: {imageName}
+                        </p>
+                      )}
+                    </div>
+                    {formData.img_url && (
+                      <div className="w-16 h-16 rounded-md overflow-hidden border bg-gray-50 flex-shrink-0">
+                        <img
+                          src={formData.img_url}
+                          alt="Превью"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  При необходимости можно вставить ссылку вручную
+                </p>
                 <Input
                   label="URL изображения"
-                  type="url"
+                  type="string"
                   value={formData.img_url}
-                  onChange={(e) => setFormData(prev => ({ ...prev, img_url: e.target.value }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, img_url: e.target.value, }))}
+                  placeholder="https://example.com/image.jpg"
                 />
               </div>
               
@@ -186,7 +281,8 @@ export const Admin: React.FC = () => {
                 </Button>
                 <Button
                   type="submit"
-                  loading={isAdding}
+                  loading={isAdding || isUploading}
+                  disabled={isUploading}
                 >
                   Добавить товар
                 </Button>

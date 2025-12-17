@@ -53,11 +53,11 @@ class NotificationSender:
         order_id = data.get("order_id")
         status = data.get("status")
         user_email = data.get("user_email")
-        user_name = data.get("user_name")
+        telegram_username = data.get("telegram_username")
         total_amount = data.get("total_amount")
 
         telegram_message = order_processed_template(
-            order_id, status, user_name, user_email, total_amount
+            order_id, status, telegram_username, user_email, total_amount
         )
 
         await send_to_admins(telegram_message)
@@ -67,11 +67,11 @@ class NotificationSender:
         """Обработка уведомления о новом созданном заказе"""
         order_id = data.get("order_id")
         user_email = data.get("user_email")
-        user_name = data.get("user_name")
+        telegram_username = data.get("telegram_username")
         total_amount = data.get("total_amount")
 
         telegram_message = new_order_created_template(
-            order_id, user_name, user_email, total_amount
+            order_id, telegram_username, user_email, total_amount
         )
 
         await send_to_admins(telegram_message)

@@ -3,20 +3,27 @@ from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.types import Message, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiohttp import ClientTimeout
+from aiogram.client.session.aiohttp import AiohttpSession
 import asyncpg
 from dotenv import load_dotenv
+import aiohttp
+import asyncio
 
 from .shared_bot import send_to_admins
 load_dotenv('.env')
 
-TOKEN = os.getenv(str("TELEGRAM_BOT_TOKEN"))
-# Инициализация бота и диспетчера
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
+# timeout = ClientTimeout(total=600)
+# session = AiohttpSession(timeout=timeout)
+
+# bot = Bot(token=TOKEN, session=session)
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Список ID админов (замени на реальные)
 ADMIN_IDS = [6473177486, 6790135401]
+
 
 def is_admin(user_id: int) -> bool:
     """Проверяет, является ли пользователь админом"""
