@@ -159,12 +159,14 @@ def create_user(db: Session, new_user_data: schemas.UserRegister) -> models.User
     db.refresh(user)
     return user
 
-def get_user_by_email_or_us(db: Session, username='', email='') -> Optional[models.User]:
+def get_user_by_email_or_us(db: Session, username='', email='') -> (Optional[models.User], Optional[models.User]):
+    user_by_username = None
+    user_by_email = None
     if username:
-        user = db.query(models.User).filter(models.User.username==username).first()
-    else:
-        user = db.query(models.User).filter(models.User.email==email).first()
-    return user
+        user_by_username = db.query(models.User).filter(models.User.username==username).first()
+    if email:
+        user_by_email = db.query(models.User).filter(models.User.email==email).first()
+    return user_by_username, user_by_email
 
 def verify_user_password(db: Session, username: str, password: str):
     user = get_user_by_email_or_us(db, username)

@@ -35,9 +35,13 @@ def create_user(
         user: schemas.UserRegister,
         response: Response,
         db: Session = Depends(get_db)):
-    existing_user = crud.get_user_by_email_or_us(db, user.username, '')
-    if existing_user:
+    user_by_username, user_by_email = crud.get_user_by_email_or_us(db, user.username, user.email)
+    if user_by_username and user_by_email:
+        raise HTTPException(status_code=400, detail="Username and email already exists")
+    if user_by_username:
         raise HTTPException(status_code=400, detail="Username already exists")
+    if user_by_email:
+        raise HTTPException(status_code=400, detail="Email already exists")
 
     db_user = crud.create_user(db, user)
     print(f"dp_user {db_user}")
@@ -112,14 +116,14 @@ def login(
 
     return user
 
-@router.post("/logout", response_model=schemas.UserResponse)
+@router.post("/logout", response_model=None)
 def logout(
         request: Request,
         response: Response,
         db: Session = Depends(get_db)):
 
     token = request.cookies.get("session_token")
-
+    print(f"logout_token {token}")
     if token:
         delete_session(db, token)
         response.delete_cookie("session_token")
