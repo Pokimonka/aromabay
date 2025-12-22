@@ -17,13 +17,13 @@ export const authService = {
   // Получение текущего пользователя
   getCurrentUser: async (): Promise<User> => {
     const response = await api.get('/api/v1/auth/me');
-    console.log("response_data: ", response.data)
     return response.data;
   },
 
   // Выход
   logout: async (): Promise<void> => {
-    await api.post('/api/v1/auth/logout');
+    const response = await api.post('/api/v1/auth/logout');
+    return response.data;
   },
 };
 

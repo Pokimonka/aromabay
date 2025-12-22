@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { Perfume } from '../types';
 import { Button } from '../components/common/Button';
 import { useCart } from '../contexts/CartContext';
+import { getImageUrl, handleImageError } from '../utils/imageUtils';
 
 interface ProductDetailProps {
   perfume: Perfume;
@@ -21,7 +22,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
   // Показываем кнопку, если описание длиннее 150 символов или содержит более 3 строк
   const description = perfume.description || '';
   const shouldShowExpand = description.length > 150 || (description.split('\n').length > 3);
-
+  console.log(perfume.img_url)
   const handleAddToCart = async () => {
     try {
       setIsAdding(true);
@@ -50,6 +51,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
     }
   };
 
+
   return (
     <div 
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto overflow-x-hidden"
@@ -62,24 +64,11 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
             <div className="bg-gray-100 rounded-lg h-64 sm:h-80 lg:h-96 flex items-center justify-center overflow-hidden">
               <img
                 key={`${perfume.id}-${perfume.img_url || 'no-img'}`}
-                src={perfume.img_url || '/src/images/placeholder.jpg'}
+                src={getImageUrl(perfume.img_url)}
                 alt={perfume.name}
                 className="max-w-full max-h-full object-contain"
                 loading="lazy"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  const placeholderPath = '/src/images/placeholder.jpg';
-                  const currentSrc = target.src;
-                  
-                  // Предотвращаем бесконечный цикл ошибок
-                  if (!currentSrc.includes('placeholder.jpg')) {
-                    target.src = placeholderPath;
-                    // Если и placeholder не загрузился, скрываем изображение
-                    target.onerror = () => {
-                      target.style.display = 'none';
-                    };
-                  }
-                }}
+                onError={handleImageError}
               />
             </div>
           </div>

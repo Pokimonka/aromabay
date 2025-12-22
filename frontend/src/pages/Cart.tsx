@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/common/Button';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { orderService } from '../services/order';
+import { getImageUrl, handleImageError } from '../utils/imageUtils';
 
 export const Cart: React.FC = () => {
   const { items, total, isLoading, updateQuantity, removeFromCart, clearCart, showAuthModalFunc } = useCart();
@@ -100,18 +101,14 @@ export const Cart: React.FC = () => {
                 className="flex items-center p-4 border-b last:border-b-0"
               >
                 {/* Изображение */}
-                <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 mr-4">
+                <div className="w-16 h-16 bg-gray-100 rounded-lg flex-shrink-0 mr-4 flex items-center justify-center overflow-hidden">
                   <img
                     key={item.perfume.id}
-                    src={item.perfume.img_url || '/src/images/placeholder.jpg'}
+                    src={getImageUrl(item.perfume.img_url)}
                     alt={item.perfume.name}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      if (target.src !== '/src/images/placeholder.jpg' && target.src !== window.location.origin + '/src/images/placeholder.jpg') {
-                        target.src = '/src/images/placeholder.jpg';
-                      }
-                    }}
-                    className="w-full h-full object-cover rounded-lg"
+                    className="max-w-full max-h-full object-contain"
+                    loading="lazy"
+                    onError={handleImageError}
                   />
                 </div>
 

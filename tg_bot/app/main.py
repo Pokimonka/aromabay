@@ -4,7 +4,7 @@ import sys
 
 from app.bot import start_bot
 from app.notification_sender import start_notification_sender
-from app.order_processor import start_order_processor  # ← ДОБАВИТЬ
+from app.order_processor import start_order_processor
 
 async def main():
     """Запуск всех компонентов бота"""

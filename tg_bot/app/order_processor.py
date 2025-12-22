@@ -65,7 +65,7 @@ class OrderProcessor:
                 if item['stock_quantity'] < item['quantity']:
                     all_in_stock = False
                     print(f"❌ Not enough stock for {item['perfume_name']}")
-                    break
+                    return
 
             # Обновляем статус заказа
             if all_in_stock:

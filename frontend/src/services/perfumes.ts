@@ -9,6 +9,7 @@ export const perfumeService = {
     page?: number;
   }) => {
     const response = await api.get('/api/v1/perfumes/', { params });
+    console.log(response.data)
     return response.data;
   },
 
@@ -21,6 +22,7 @@ export const perfumeService = {
   // Создать товар (админ)
   createPerfume: async (perfume: Omit<Perfume, 'id' | 'createdAt'>) => {
     const response = await api.post('/api/v1/perfumes/', perfume);
+    console.log(response);
     return response.data;
   },
 

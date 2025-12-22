@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { Perfume } from '../../../types';
 import { Button } from '../../common/Button';
 import { useCart } from '../../../contexts/CartContext';
+import { getImageUrl, handleImageError } from '../../../utils/imageUtils';
 
 interface PerfumeCardProps {
   perfume: Perfume;
@@ -28,20 +29,16 @@ export const PerfumeCard: React.FC<PerfumeCardProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
       <div 
-        className="h-48 bg-gray-200 cursor-pointer flex-shrink-0"
+        className="h-48 bg-gray-100 rounded-t-lg cursor-pointer flex-shrink-0 flex items-center justify-center overflow-hidden"
         onClick={() => onViewDetails(perfume)}
       >
         <img
           key={perfume.id}
-          src={perfume.img_url || '/src/images/placeholder.jpg'}
+          src={getImageUrl(perfume.img_url)}
           alt={perfume.name}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            if (target.src !== '/src/images/placeholder.jpg' && target.src !== window.location.origin + '/src/images/placeholder.jpg') {
-              target.src = '/src/images/placeholder.jpg';
-            }
-          }}
+          className="max-w-full max-h-full object-contain"
+          loading="lazy"
+          onError={handleImageError}
         />
       </div>
       
