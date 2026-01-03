@@ -74,9 +74,8 @@ export const PerfumeCard: React.FC<PerfumeCardProps> = ({
           <Button
             variant="primary"
             size="sm"
-            className="flex-1"
+            className={`flex-1 ${perfume.stock_quantity === 0 ? 'opacity-60' : ''}`}
             loading={isAdding}
-            disabled={perfume.stock_quantity === 0}
             onClick={handleAddToCart}
           >
             В корзину

@@ -73,7 +73,7 @@ export const Register: React.FC = () => {
       navigate(redirect, { replace: true });
     } catch (error: any) {
       setErrors({ 
-        submit: error.response?.data?.message || 'Ошибка при регистрации' 
+        submit: error.response?.data?.detail || 'Ошибка при регистрации' 
       });
     } finally {
       setIsLoading(false);
