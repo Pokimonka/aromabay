@@ -14,8 +14,10 @@ def add_to_cart(
         db: Session = Depends(get_db)
     ):
     user_id = current_user.id
-    # Создаем заказ
+
     db_cart = crud.add_to_cart(db=db, user_id=user_id, item_data=cart_item)
+    if isinstance(db_cart, str):
+        raise HTTPException(status_code=409, detail="OUT_OF_STOCK")
     print(db_cart)
 
     return db_cart

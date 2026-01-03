@@ -10,6 +10,8 @@ interface CartState {
   showAuthModal: boolean;
   pendingAction: 'add-to-cart' | 'checkout' | null;
   pendingPerfume?: Perfume;
+  outOfStockItems: number[]; // IDs товаров, которые недоступны
+  toastMessage: string | null; // Сообщение для всплывающего уведомления
 }
 
 type CartAction =
@@ -20,7 +22,12 @@ type CartAction =
   | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
   | { type: 'CLEAR_CART' }
   | { type: 'SHOW_AUTH_MODAL'; payload: { action: 'add-to-cart' | 'checkout'; perfume?: Perfume } }
-  | { type: 'HIDE_AUTH_MODAL' };
+  | { type: 'HIDE_AUTH_MODAL' }
+  | { type: 'SET_OUT_OF_STOCK'; payload: number } // perfume ID
+  | { type: 'REMOVE_OUT_OF_STOCK'; payload: number } // perfume ID
+  | { type: 'CLEAR_OUT_OF_STOCK' } // очистить весь список
+  | { type: 'SHOW_TOAST'; payload: string } // показать уведомление
+  | { type: 'HIDE_TOAST' }; // скрыть уведомление
 
 // Убираем extends CartState и явно перечисляем все свойства
 interface CartContextType {
@@ -41,6 +48,9 @@ interface CartContextType {
   showAuthModalFunc: (action: 'add-to-cart' | 'checkout', perfume?: Perfume) => void; // Переименовываем
   hideAuthModal: () => void;
   executePendingAction: () => Promise<void>;
+  isOutOfStock: (perfumeId: number) => boolean;
+  toastMessage: string | null;
+  hideToast: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -122,7 +132,28 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       return { ...state, items: updatedItems, total: totalAfterUpdate };
     
     case 'CLEAR_CART':
-      return { ...state, items: [], total: 0 };
+      return { ...state, items: [], total: 0, outOfStockItems: [] };
+    
+    case 'SET_OUT_OF_STOCK':
+      if (state.outOfStockItems.includes(action.payload)) {
+        return state;
+      }
+      return { ...state, outOfStockItems: [...state.outOfStockItems, action.payload] };
+    
+    case 'REMOVE_OUT_OF_STOCK':
+      return { 
+        ...state, 
+        outOfStockItems: state.outOfStockItems.filter(id => id !== action.payload) 
+      };
+    
+    case 'CLEAR_OUT_OF_STOCK':
+      return { ...state, outOfStockItems: [] };
+    
+    case 'SHOW_TOAST':
+      return { ...state, toastMessage: action.payload };
+    
+    case 'HIDE_TOAST':
+      return { ...state, toastMessage: null };
     
     default:
       return state;
@@ -135,6 +166,8 @@ const initialState: CartState = {
   isLoading: false,
   showAuthModal: false,
   pendingAction: null,
+  outOfStockItems: [],
+  toastMessage: null,
 };
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -149,6 +182,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loadCart();
     } else {
       dispatch({ type: 'SET_ITEMS', payload: [] });
+      // Очищаем список недоступных товаров при разлогине
+      dispatch({ type: 'CLEAR_OUT_OF_STOCK' });
     }
   }, [isAuthenticated, authLoading]);
 
@@ -175,8 +210,24 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await cartService.addToCart(perfume.id, 1);
       dispatch({ type: 'ADD_ITEM', payload: perfume });
-    } catch (error) {
+      // Убираем товар из списка недоступных, если он был там (на случай, если он снова появился)
+      if (state.outOfStockItems.includes(perfume.id)) {
+        dispatch({ type: 'REMOVE_OUT_OF_STOCK', payload: perfume.id });
+      }
+    } catch (error: any) {
       console.error('Failed to add to cart:', error);
+      // Проверяем, является ли это ошибкой 409 с detail "OUT_OF_STOCK"
+      const status = error?.response?.status || error?.status;
+      const detail = error?.response?.data?.detail || error?.response?.data?.message || error?.message;
+      
+      if (status === 409) {
+        // Проверяем регистронезависимо
+        const detailStr = String(detail || '').toUpperCase();
+        if (detailStr === 'OUT_OF_STOCK' || detailStr.includes('OUT_OF_STOCK') || detailStr.includes('OUT OF STOCK')) {
+          // Показываем уведомление (не блокируем кнопку, чтобы можно было попробовать снова после удаления из корзины)
+          dispatch({ type: 'SHOW_TOAST', payload: 'Больше товара добавить нельзя, не хватает на складе' });
+        }
+      }
       throw error;
     }
   };
@@ -235,6 +286,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return state.items.reduce((total, item) => total + item.quantity, 0);
   };
 
+  const isOutOfStock = (perfumeId: number) => {
+    return state.outOfStockItems.includes(perfumeId);
+  };
+
+  const hideToast = () => {
+    dispatch({ type: 'HIDE_TOAST' });
+  };
+
   return (
     <CartContext.Provider value={{
       ...state,
@@ -246,6 +305,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       showAuthModalFunc,
       hideAuthModal,
       executePendingAction,
+      isOutOfStock,
+      hideToast,
     }}>
       {children}
     </CartContext.Provider>

@@ -184,12 +184,13 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
               <Button
                 variant="primary"
                 size="lg"
-                className="w-full"
+                className={`w-full ${perfume.stock_quantity === 0 ? 'opacity-60' : ''}`}
                 loading={isAdding}
-                disabled={perfume.stock_quantity === 0}
                 onClick={handleAddToCart}
               >
-                {perfume.stock_quantity === 0 ? 'Нет в наличии' : `Добавить ${quantity} шт. в корзину`}
+                {perfume.stock_quantity === 0 
+                  ? 'Нет в наличии' 
+                  : `Добавить ${quantity} шт. в корзину`}
               </Button>
             </div>
           </div>
