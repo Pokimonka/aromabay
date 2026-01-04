@@ -38,13 +38,17 @@ def update_quantity(
         cart_item: schemas.CartItemUpdate,
         current_user: models.User = Depends(get_current_user),
         db: Session = Depends(get_db)):
+
     print("get_cart")
     cart = crud.update_perfume_quantity(db,
                                         user_id=current_user.id,
                                         perfume_id=perfume_id,
-                                        quantity=cart_item.quantity)
+                                        new_quantity=cart_item.quantity)
     if not cart:
         raise HTTPException(status_code=404, detail="Cart not found")
+
+    if isinstance(cart, str):
+        raise HTTPException(status_code=409, detail="OUT_OF_STOCK")
 
     return cart
 
