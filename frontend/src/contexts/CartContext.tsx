@@ -266,8 +266,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await cartService.updateQuantity(perfumeId, quantity);
       dispatch({ type: 'UPDATE_QUANTITY', payload: { id: perfumeId, quantity } });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update quantity:', error);
+      // Проверяем, является ли это ошибкой 409 с detail "OUT_OF_STOCK"
+      const status = error?.response?.status || error?.status;
+      const detail = error?.response?.data?.detail || error?.response?.data?.message || error?.message;
+      
+      if (status === 409) {
+        // Проверяем регистронезависимо
+        const detailStr = String(detail || '').toUpperCase();
+        if (detailStr === 'OUT_OF_STOCK' || detailStr.includes('OUT_OF_STOCK') || detailStr.includes('OUT OF STOCK')) {
+          // Показываем уведомление
+          dispatch({ type: 'SHOW_TOAST', payload: 'Больше товара добавить нельзя, не хватает на складе' });
+        }
+      }
       throw error;
     }
   };

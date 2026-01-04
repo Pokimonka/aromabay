@@ -118,14 +118,23 @@ def update_perfume_quantity(
         db: Session,
         user_id: int,
         perfume_id: int,
-        quantity: int):
+        new_quantity: int) -> Union[dict, str]:
+
+    stock_quantity = get_stock_quantity(perfume_id, db)
+    print(f"new_quantity, stock_quantity {new_quantity}, {stock_quantity}")
+    if new_quantity > stock_quantity:
+        return "OUT_OF_STOCK"
+
     cart = get_cart(db, user_id)
 
-    cart_item = get_cart_item(db, cart.id, perfume_id)
-
-    if cart_item:
-        cart_item.quantity = quantity
-        db.commit()
+    existing_item = get_cart_item(db, cart.id, perfume_id)
+    print(f"exist_it.qua: {existing_item.quantity}")
+    if existing_item:
+        if  0 < new_quantity <= stock_quantity:
+            existing_item.quantity = new_quantity
+            db.commit()
+        else:
+            return "OUT_OF_STOCK"
 
     return get_cart_items(db, user_id)
 

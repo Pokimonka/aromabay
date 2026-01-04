@@ -13,10 +13,15 @@ export const Cart: React.FC = () => {
   const [isOrdering, setIsOrdering] = useState(false);
 
   const handleQuantityChange = async (perfumeId: number, newQuantity: number) => {
-    if (newQuantity === 0) {
-      await removeFromCart(perfumeId);
-    } else {
-      await updateQuantity(perfumeId, newQuantity);
+    try {
+      if (newQuantity === 0) {
+        await removeFromCart(perfumeId);
+      } else {
+        await updateQuantity(perfumeId, newQuantity);
+      }
+    } catch (error) {
+      // Ошибка уже обработана в updateQuantity (показ уведомления)
+      // Здесь просто игнорируем, чтобы не было необработанных ошибок
     }
   };
 
