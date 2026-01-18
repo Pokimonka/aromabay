@@ -92,18 +92,18 @@ export const Header: React.FC = () => {
                 >
                   <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
                     <span className="text-sm font-medium text-gray-700">
-                      {user?.firstName?.[0]}{user?.lastName?.[0]}
+                      {user?.username?.[0]}{user?.telegram_username?.[0]}
                     </span>
                   </div>
                   <span className="text-sm font-medium">
-                    {user?.firstName}
+                    {user?.username}
                   </span>
                 </button>
 
                 {showUserMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border py-1 z-50">
                     <div className="px-4 py-2 border-b">
-                      <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
+                      <p className="text-sm font-medium">{user?.username} {user?.telegram_username}</p>
                       <p className="text-xs text-gray-500">{user?.email}</p>
                     </div>
                     <button
