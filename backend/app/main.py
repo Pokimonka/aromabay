@@ -45,7 +45,7 @@ app = FastAPI(
 # Раздаем загруженные изображения
 STATIC_UPLOADS_DIR = Path(__file__).resolve().parent / "uploads"
 STATIC_UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
-app.mount("/upload", StaticFiles(directory=str(STATIC_UPLOADS_DIR)), name="upload")
+app.mount("/uploads", StaticFiles(directory=str(STATIC_UPLOADS_DIR)), name="upload")
 
 # CORS
 app.add_middleware(
