@@ -74,7 +74,7 @@ def create_user(
 @router.get("/me", response_model=schemas.UserResponse)
 def get_user(
     current_user: models.User = Depends(get_current_user)):
-    logger.info.info(f"/me current_user: {current_user}")
+    logger.info(f"/me current_user: {current_user}")
     user = {
         "id": current_user.id,
         "username": current_user.username,
@@ -92,8 +92,7 @@ def login(
         db: Session = Depends(get_db)):
 
     logger.info(f"login: {user.email}")
-    existing_user = crud.get_user_by_email_or_us(db, '', user.email)
-
+    _, existing_user = crud.get_user_by_email_or_us(db, '', user.email)
     if not existing_user or not crud.verify_password(user.password, existing_user.hashed_password):
         raise HTTPException(status_code=401, detail="Wrong username or password")
 
