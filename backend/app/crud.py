@@ -185,9 +185,9 @@ def get_user_by_email_or_us(db: Session, username='', email='') -> (Optional[mod
     user_by_username = None
     user_by_email = None
     if username:
-        user_by_username = db.query(models.User).filter(models.User.username==username).first()
+        user_by_username = db.query(models.User).filter(models.User.username==username.lower()).first()
     if email:
-        user_by_email = db.query(models.User).filter(models.User.email==email).first()
+        user_by_email = db.query(models.User).filter(models.User.email==email.lower()).first()
     return user_by_username, user_by_email
 
 def verify_user_password(db: Session, username: str, password: str):
