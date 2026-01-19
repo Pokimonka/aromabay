@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from starlette.responses import JSONResponse
 from PIL import Image
+import logging
 
 router = APIRouter(prefix="/uploads", tags=["uploads"])
 
@@ -20,7 +21,6 @@ async def upload_perfume_image(file: UploadFile = File(...)):
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
     content = await file.read()
-    print(content)
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="File too large")
 
