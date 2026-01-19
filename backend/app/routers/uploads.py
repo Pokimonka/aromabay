@@ -5,13 +5,15 @@ from pathlib import Path
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from starlette.responses import JSONResponse
 from PIL import Image
+import logging
 
 router = APIRouter(prefix="/uploads", tags=["uploads"])
 
-UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads" / "perfumes"
+UPLOAD_DIR = Path(__file__).resolve().parent.parent  / "uploads" / "perfumes"
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
+print(UPLOAD_DIR)
 
 @router.post('/image')
 async def upload_perfume_image(file: UploadFile = File(...)):
@@ -29,6 +31,7 @@ async def upload_perfume_image(file: UploadFile = File(...)):
     file_id = str(uuid.uuid4())
     filename = f"{file_id}{file_ext}"
     filepath = UPLOAD_DIR / filename
+    print(filepath)
 
     with open(filepath, "wb") as buf:
         buf.write(content)

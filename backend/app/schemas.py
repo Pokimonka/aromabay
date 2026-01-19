@@ -6,7 +6,6 @@ from app.models import PerfumeType
 
 
 class PerfumeBase(BaseModel):
-    id: int
     name: str
     brand: str
     price: float

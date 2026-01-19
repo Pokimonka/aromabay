@@ -6,6 +6,7 @@ import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import  { PerfumeType } from '../types';
+import { getImageUrl, handleImageError } from '../utils/imageUtils';
 
 export const Admin: React.FC = () => {
   const { perfumes, loading, refetch } = usePerfumes();
@@ -236,11 +237,12 @@ export const Admin: React.FC = () => {
                       )}
                     </div>
                     {formData.img_url && (
-                      <div className="w-16 h-16 rounded-md overflow-hidden border bg-gray-50 flex-shrink-0">
+                      <div className="w-16 h-16 rounded-md overflow-hidden border bg-gray-100 flex-shrink-0 flex items-center justify-center">
                         <img
-                          src={formData.img_url}
+                          src={getImageUrl(formData.img_url)}
                           alt="Превью"
-                          className="w-full h-full object-cover"
+                          className="max-w-full max-h-full object-contain"
+                          onError={handleImageError}
                         />
                       </div>
                     )}
@@ -317,11 +319,13 @@ export const Admin: React.FC = () => {
                 <tr key={perfume.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="w-10 h-10 bg-gray-200 rounded-lg flex-shrink-0 mr-3">
+                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex-shrink-0 mr-3 flex items-center justify-center overflow-hidden">
                         <img
-                          src={perfume.img_url || '/api/placeholder/40/40'}
+                          src={getImageUrl(perfume.img_url)}
                           alt={perfume.name}
-                          className="w-full h-full object-cover rounded-lg"
+                          className="max-w-full max-h-full object-contain"
+                          loading="lazy"
+                          onError={handleImageError}
                         />
                       </div>
                       <div>

@@ -14,8 +14,10 @@ def add_to_cart(
         db: Session = Depends(get_db)
     ):
     user_id = current_user.id
-    # Создаем заказ
+
     db_cart = crud.add_to_cart(db=db, user_id=user_id, item_data=cart_item)
+    if isinstance(db_cart, str):
+        raise HTTPException(status_code=409, detail="OUT_OF_STOCK")
     print(db_cart)
 
     return db_cart
@@ -36,13 +38,17 @@ def update_quantity(
         cart_item: schemas.CartItemUpdate,
         current_user: models.User = Depends(get_current_user),
         db: Session = Depends(get_db)):
+
     print("get_cart")
     cart = crud.update_perfume_quantity(db,
                                         user_id=current_user.id,
                                         perfume_id=perfume_id,
-                                        quantity=cart_item.quantity)
+                                        new_quantity=cart_item.quantity)
     if not cart:
         raise HTTPException(status_code=404, detail="Cart not found")
+
+    if isinstance(cart, str):
+        raise HTTPException(status_code=409, detail="OUT_OF_STOCK")
 
     return cart
 

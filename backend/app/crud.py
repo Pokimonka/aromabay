@@ -1,7 +1,7 @@
 import sqlalchemy
 from sqlalchemy.orm import Session
 from . import models, schemas
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Union
 
 from .models import Perfume, CartItem
 from .password_utils import hash_password, verify_password
@@ -81,15 +81,28 @@ def get_cart_items(db: Session, user_id: int):
 
     return {"id":cart.id, "user_id": user_id, "items": cart_items}
 
+def get_stock_quantity(perfume_id: int, db: Session) -> int:
+    perfume = db.query(models.Perfume).filter(models.Perfume.id == perfume_id).first()
+    print(perfume.stock_quantity)
+    return perfume.stock_quantity
 
-def add_to_cart(db: Session, user_id: int, item_data: schemas.CartItemCreate) -> models.Cart:
-    # Создаем заказ
+
+def add_to_cart(db: Session, user_id: int, item_data: schemas.CartItemCreate) -> Union[models.Cart, str]:
+    # кладем в корзину
+    perfume_id = item_data.perfume_id
+    stock_quantity = get_stock_quantity(perfume_id, db)
     cart = get_cart(db, user_id)
 
-    existing_item =  get_cart_item(db, cart.id, item_data.perfume_id)
+    if item_data.quantity > stock_quantity:
+        return "OUT_OF_STOCK"
+
+    existing_item =  get_cart_item(db, cart.id, perfume_id)
 
     if existing_item:
-        existing_item.quantity += item_data.quantity
+        if existing_item.quantity < stock_quantity:
+            existing_item.quantity += item_data.quantity
+        elif existing_item.quantity >= stock_quantity:
+            return "OUT_OF_STOCK"
     else:
         new_item = models.CartItem(
             cart_id = cart.id,
@@ -105,14 +118,23 @@ def update_perfume_quantity(
         db: Session,
         user_id: int,
         perfume_id: int,
-        quantity: int):
+        new_quantity: int) -> Union[dict, str]:
+
+    stock_quantity = get_stock_quantity(perfume_id, db)
+    print(f"new_quantity, stock_quantity {new_quantity}, {stock_quantity}")
+    if new_quantity > stock_quantity:
+        return "OUT_OF_STOCK"
+
     cart = get_cart(db, user_id)
 
-    cart_item = get_cart_item(db, cart.id, perfume_id)
-
-    if cart_item:
-        cart_item.quantity = quantity
-        db.commit()
+    existing_item = get_cart_item(db, cart.id, perfume_id)
+    print(f"exist_it.qua: {existing_item.quantity}")
+    if existing_item:
+        if  0 < new_quantity <= stock_quantity:
+            existing_item.quantity = new_quantity
+            db.commit()
+        else:
+            return "OUT_OF_STOCK"
 
     return get_cart_items(db, user_id)
 
@@ -159,12 +181,14 @@ def create_user(db: Session, new_user_data: schemas.UserRegister) -> models.User
     db.refresh(user)
     return user
 
-def get_user_by_email_or_us(db: Session, username='', email='') -> Optional[models.User]:
+def get_user_by_email_or_us(db: Session, username='', email='') -> (Optional[models.User], Optional[models.User]):
+    user_by_username = None
+    user_by_email = None
     if username:
-        user = db.query(models.User).filter(models.User.username==username).first()
-    else:
-        user = db.query(models.User).filter(models.User.email==email).first()
-    return user
+        user_by_username = db.query(models.User).filter(models.User.username==username.lower()).first()
+    if email:
+        user_by_email = db.query(models.User).filter(models.User.email==email.lower()).first()
+    return user_by_username, user_by_email
 
 def verify_user_password(db: Session, username: str, password: str):
     user = get_user_by_email_or_us(db, username)
