@@ -25,9 +25,9 @@ def get_user_by_id(db: Session, user_id: int) -> models.User:
 
 def get_current_user(request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("session_token")
-    logger(f"token from get_current_user: {token}")
+    logger.info(f"token from get_current_user: {token}")
     user_id = get_user_id_from_session(db, token)
-    logger(f"current user: {user_id}")
+    logger.info(f"current user: {user_id}")
     if not user_id:
         raise HTTPException(status_code=401, detail="Not auth")
     user_info = get_user_by_id(db, user_id)
@@ -47,9 +47,9 @@ def create_user(
         raise HTTPException(status_code=400, detail="Email already exists")
 
     db_user = crud.create_user(db, user)
-    logger(f"dp_user {db_user}")
+    logger.info(f"dp_user {db_user}")
     token = create_session(db, db_user.id)
-    logger(f"token {token}")
+    logger.info(f"token {token}")
 
     user = schemas.AuthResponse(
         id=db_user.id,
@@ -59,7 +59,7 @@ def create_user(
         session_token=token,
         message="success"
     )
-    logger(f"user {user}")
+    logger.info(f"user {user}")
     response.set_cookie(
         key="session_token",
         value=token,
@@ -74,7 +74,7 @@ def create_user(
 @router.get("/me", response_model=schemas.UserResponse)
 def get_user(
     current_user: models.User = Depends(get_current_user)):
-    logger(f"/me current_user: {current_user}")
+    logger.info.info(f"/me current_user: {current_user}")
     user = {
         "id": current_user.id,
         "username": current_user.username,
@@ -91,14 +91,14 @@ def login(
         response: Response,
         db: Session = Depends(get_db)):
 
-    logger(f"login: {user.email}")
+    logger.info(f"login: {user.email}")
     existing_user = crud.get_user_by_email_or_us(db, '', user.email)
 
     if not existing_user or not crud.verify_password(user.password, existing_user.hashed_password):
         raise HTTPException(status_code=401, detail="Wrong username or password")
 
     token = create_session(db, existing_user.id)
-    logger(f"token: {token}")
+    logger.info(f"token: {token}")
     user = schemas.AuthResponse(
         id=existing_user.id,
         username=existing_user.username,
@@ -126,7 +126,7 @@ def logout(
         db: Session = Depends(get_db)):
 
     token = request.cookies.get("session_token")
-    logger(f"logout_token {token}")
+    logger.info(f"logout_token {token}")
     if token:
         delete_session(db, token)
         response.delete_cookie("session_token")
