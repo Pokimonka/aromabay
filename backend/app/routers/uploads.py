@@ -1,70 +1,31 @@
 import os
-import uuid
-from pathlib import Path
-
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File
 from starlette.responses import JSONResponse
-from PIL import Image
-import logging
+from app.s3cloude import S3Client
 
 router = APIRouter(prefix="/uploads", tags=["uploads"])
 
-UPLOAD_DIR = Path(__file__).resolve().parent.parent  / "uploads" / "perfumes"
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
-print(UPLOAD_DIR)
+ACCESS_S3_KEY = os.getenv("ACCESS_S3_KEY")
+SECRET_S3_KEY = os.getenv("SECRET_S3_KEY")
+ENDPOINT_URL = os.getenv("ENDPOINT_URL")
+BUCKET_NAME = os.getenv("BUCKET_NAME")
 
 @router.post('/image')
 async def upload_perfume_image(file: UploadFile = File(...)):
-    # Создаем каталог, если его еще нет
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    s3_client = S3Client(
+        access_key=ACCESS_S3_KEY,
+        secret_key=SECRET_S3_KEY,
+        endpoint_url=ENDPOINT_URL,
+        bucket_name=BUCKET_NAME
+    )
 
-    content = await file.read()
-    if len(content) > MAX_FILE_SIZE:
-        raise HTTPException(status_code=400, detail="File too large")
-
-    file_ext = Path(file.filename).suffix.lower()
-    if file_ext not in ALLOWED_EXTENSIONS:
-        raise HTTPException(status_code=400, detail="Invalid file type")
-
-    file_id = str(uuid.uuid4())
-    filename = f"{file_id}{file_ext}"
-    filepath = UPLOAD_DIR / filename
-    print(filepath)
-
-    with open(filepath, "wb") as buf:
-        buf.write(content)
-
-    try:
-        optimize_img(filepath)
-    except Exception as e:
-        print(f"img optimize error: {e}")
-
-    img_url = f"/upload/perfumes/{filename}"
-
+    url, content = await s3_client.upload_file(file)
     return JSONResponse({
         "success": True,
-        "filename": filename,
-        "url": img_url,
-        "size": len(content)
+        "filename": file.filename,
+        "url": url,
+        "size": content
     })
-
-
-def optimize_img(filepath: Path, max_size: tuple = (800, 800)):
-    with Image.open(filepath) as img:
-        if img.mode in ("RGBA", "P"):
-            img = img.convert("RGB")
-
-        img.thumbnail(max_size, Image.Resampling.LANCZOS)
-
-        save_params = {}
-        ext = filepath.suffix.lower()
-        if ext in {".jpg", ".jpeg"}:
-            save_params = {"format": "JPEG", "quality": 85, "optimize": True}
-        elif ext == ".webp":
-            save_params = {"format": "WEBP", "quality": 85, "method": 6}
-        elif ext == ".png":
-            save_params = {"format": "PNG", "optimize": True}
-
-        img.save(filepath, **save_params)

@@ -14,7 +14,12 @@ export const PerfumeCard: React.FC<PerfumeCardProps> = ({
   onViewDetails 
 }) => {
   const [isAdding, setIsAdding] = useState(false);
-  const { addToCart } = useCart();
+  const [isUpdating, setIsUpdating] = useState(false);
+  const { items, addToCart, updateQuantity, removeFromCart } = useCart();
+  const cartQty = items.find(item => item.perfume.id === perfume.id)?.quantity ?? 0;
+  const atStockLimit =
+    perfume.stock_quantity > 0 && cartQty >= perfume.stock_quantity;
+
   const handleAddToCart = async () => {
     try {
       setIsAdding(true);
@@ -23,6 +28,34 @@ export const PerfumeCard: React.FC<PerfumeCardProps> = ({
       console.error('Failed to add to cart:', error);
     } finally {
       setIsAdding(false);
+    }
+  };
+
+  const handleDecrease = async () => {
+    if (cartQty <= 0) return;
+    try {
+      setIsUpdating(true);
+      if (cartQty === 1) {
+        await removeFromCart(perfume.id);
+      } else {
+        await updateQuantity(perfume.id, cartQty - 1);
+      }
+    } catch (error) {
+      console.error('Failed to update cart:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleIncrease = async () => {
+    if (atStockLimit) return;
+    try {
+      setIsUpdating(true);
+      await addToCart(perfume);
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -71,16 +104,48 @@ export const PerfumeCard: React.FC<PerfumeCardProps> = ({
         </div>
         
         <div className="flex gap-2 mt-auto flex-shrink-0">
-          <Button
-            variant="primary"
-            size="sm"
-            className={`flex-1 ${perfume.stock_quantity === 0 ? 'opacity-60' : ''}`}
-            loading={isAdding}
-            onClick={handleAddToCart}
-          >
-            В корзину
-          </Button>
-          
+          {cartQty > 0 ? (
+            <div className="flex-1 flex items-stretch gap-1 min-w-0">
+              <button
+                type="button"
+                onClick={e => {
+                  e.stopPropagation();
+                  void handleDecrease();
+                }}
+                disabled={isUpdating}
+                className="flex-1 min-w-0 flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 bg-blue-400 text-white transition-colors hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-400"
+                aria-label="Уменьшить количество"
+              >
+                -
+              </button>
+              <span className="flex items-center justify-center min-w-[2.5rem] px-2 py-1.5 text-sm font-medium tabular-nums text-gray-900 border border-gray-300 rounded-lg bg-white">
+                {cartQty}
+              </span>
+              <button
+                type="button"
+                onClick={e => {
+                  e.stopPropagation();
+                  void handleIncrease();
+                }}
+                disabled={isUpdating || perfume.stock_quantity === 0 || atStockLimit}
+                className="flex-1 min-w-0 flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 bg-blue-400 text-white transition-colors hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-400"
+                aria-label="Увеличить количество"
+              >
+                +
+              </button>
+            </div>
+          ) : (
+            <Button
+              variant="primary"
+              size="sm"
+              className={`flex-1 ${perfume.stock_quantity === 0 ? 'opacity-60' : ''}`}
+              loading={isAdding}
+              onClick={handleAddToCart}
+            >
+              В корзину
+            </Button>
+          )}
+
           <Button
             variant="outline"
             size="sm"
