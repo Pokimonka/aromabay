@@ -33,7 +33,7 @@ function AppContent() {
         
         <main>
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Home onViewProduct={handleViewProduct} />} />
             <Route 
               path="/catalog" 
               element={<Catalog onViewProduct={handleViewProduct} />} 

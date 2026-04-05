@@ -26,6 +26,5 @@ def create_perfume(perfume: schemas.PerfumeCreate, db: Session = Depends(get_db)
 
 
 @router.delete("/{perfume_id}", response_model=schemas.PerfumeResponse)
-def create_perfume(perfume_id:int, db: Session = Depends(get_db)):
-
+def delete_perfume(perfume_id:int, db: Session = Depends(get_db)):
     return crud.delete_perfume(db=db, perfume_id=perfume_id)

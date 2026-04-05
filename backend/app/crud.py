@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from . import models, schemas
 from typing import List, Optional, Any, Union
 
-from .models import Perfume, CartItem
+from .models import Perfume, CartItem, Order
 from .password_utils import hash_password, verify_password
 
 
@@ -55,7 +55,7 @@ def create_order(db: Session, order: schemas.OrderCreate, user_id: int) -> model
     db.refresh(db_order)
     return db_order
 
-def get_orders(db: Session, skip: int = 0, limit: int = 100) -> List[models.Order]:
+def get_orders(db: Session, skip: int = 0, limit: int = 100) -> list[type[Order]]:
     return db.query(models.Order).order_by(models.Order.created_at.desc()).offset(skip).limit(limit).all()
 
 #cart CRUD

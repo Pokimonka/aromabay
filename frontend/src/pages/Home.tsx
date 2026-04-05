@@ -5,15 +5,13 @@ import { PerfumeCard } from '../components/features/perfumes/PerfumeCard';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import type { Perfume } from '../types';
 
-export const Home: React.FC = () => {
+interface HomeProps {
+  onViewProduct: (perfume: Perfume) => void;
+}
+
+export const Home: React.FC<HomeProps> = ({ onViewProduct }) => {
   const { perfumes, loading } = usePerfumes();
   const featuredPerfumes = perfumes.slice(0, 4);
-
-  const handleViewProduct = (perfume: Perfume) => {
-    // В реальном приложении здесь была бы навигация
-    console.log('View product:', perfume);
-    alert(`Просмотр товара: ${perfume.name}`);
-  };
 
   return (
     <div>
@@ -60,7 +58,7 @@ export const Home: React.FC = () => {
                 <PerfumeCard
                   key={perfume.id}
                   perfume={perfume}
-                  onViewDetails={handleViewProduct}
+                  onViewDetails={onViewProduct}
                 />
               ))}
             </div>
